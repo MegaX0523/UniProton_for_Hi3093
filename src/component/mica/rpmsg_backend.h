@@ -44,6 +44,7 @@ extern void rpmsg_backend_remove(void);
 /**
  * receive_message - Call it to receive messages from host(linux)
  */
+extern int send_message(void *message, int len);
 extern void receive_message(void);
 
 /* 下线时，设置rsc_table的reserved[1]为CPU_OFF_FUNCID，告诉mica侧更新状态 */

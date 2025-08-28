@@ -8,37 +8,12 @@
  * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
  * See the Mulan PSL v2 for more details.
  */
-#ifndef __TYPES_H__
-#define __TYPES_H__
 
-typedef unsigned long uintptr_t;
+#ifndef __BM_OPS_H__
+#define __BM_OPS_H__
+#include "bm_types.h"
 
-#ifndef TRUE
-#define TRUE (1)
-#endif
+#define bm_readl(addr) (*(volatile unsigned int *)((uintptr_t)(addr)))
+#define bm_writel(data, addr) (*(volatile unsigned int *)((uintptr_t)(addr)) = (unsigned int)(data))
 
-#ifndef FALSE
-#define FALSE (0)
-#endif
-
-#define BM_OK 0
-#define BM_FAIL (-1)
-#define BM_TIMEOUT (-2)
-#define BM_WAIT_FOREVER (0xffffffff)
-
-#ifndef NULL
-#define NULL ((void*)0)
-#endif
-
-typedef int errno_t;
-
-#ifndef INIT_TEXT
-#define INIT_TEXT __attribute__((section(".init.text")))
-#endif
-
-#undef BIT
-#define BIT(n) (1 << (n))
-
-#define WEAK __attribute__((weak))
-
-#endif /* __TYPES_H__ */
+#endif /* __BM_OPS_H__ */

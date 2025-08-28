@@ -8,12 +8,16 @@
  * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
  * See the Mulan PSL v2 for more details.
  */
-#ifndef __BM_COMMON_H__
-#define __BM_COMMON_H__
-
 #include "bm_types.h"
 #include "bm_uart.h"
 #include "device_resource.h"
+
+#if defined (__LIBCK__)
+#include "sre_common.h"
+#endif
+
+#ifndef __BM_COMMON_H__
+#define __BM_COMMON_H__
 
 unsigned int bm_get_coreid(void);
 unsigned long long bm_get_tick(void);

@@ -10,11 +10,13 @@
 #include "prt_log.h"
 #include "test.h"
 #include "rpmsg_backend.h"
+#include "ctltask.h"
 #ifdef LOSCFG_SHELL_MICA_INPUT
 #include "shell.h"
 #include "show.h"
 #endif
 TskHandle g_sampleHandle[2];
+TskHandle g_CtlTskHandel;
 TskHandle g_testTskHandle;
 U8 g_memRegion00[OS_MEM_FSC_PT_SIZE];
 
@@ -207,65 +209,58 @@ void DriverSampleEntry()
 }
 #endif
 
-void Test2TaskEntry()
-{
-    while (1) {
-        PRT_Printf("task 1.\n");
-        PRT_TaskDelay(6000);
-    }
-}
+// void Test2TaskEntry()
+// {
+//     while (1) {
+//         PRT_Printf("task 1.\n");
+//         PRT_TaskDelay(6000);
+//     }
+// }
 
-void Test3TaskEntry()
-{
-    while (1) {
-        PRT_Printf("task 2.\n");
-        PRT_TaskDelay(4000);
-    }
-}
+// void Test3TaskEntry()
+// {
+//     while (1) {
+//         PRT_Printf("task 2.\n");
+//         PRT_TaskDelay(4000);
+//     }
+// }
 
-U32 TaskTest()
-{
-    U32 ret;
-    U8 ptNo = OS_MEM_DEFAULT_FSC_PT;
-    struct TskInitParam param = {0};
-    TskHandle testTskHandle[2];
-
-    // task 2
-    param.stackAddr = (uintptr_t)PRT_MemAllocAlign(0, ptNo, 0x2000, MEM_ADDR_ALIGN_016);
-    param.taskEntry = (TskEntryFunc)Test2TaskEntry;
-    param.taskPrio = 20;
-    param.name = "Test2Task";
-    param.stackSize = 0x2000;
-
-    ret = PRT_TaskCreate(&testTskHandle[0], &param);
-    if (ret) {
-        return ret;
-    }
-
-    ret = PRT_TaskResume(testTskHandle[0]);
-    if (ret) {
-        return ret;
-    }
-
-    // task 3
-    param.stackAddr = (uintptr_t)PRT_MemAllocAlign(0, ptNo, 0x2000, MEM_ADDR_ALIGN_016);
-    param.taskEntry = (TskEntryFunc)Test3TaskEntry;
-    param.taskPrio = 25;
-    param.name = "Test3Task";
-    param.stackSize = 0x2000;
-
-    ret = PRT_TaskCreate(&testTskHandle[1], &param);
-    if (ret) {
-        return ret;
-    }
-
-    ret = PRT_TaskResume(testTskHandle[1]);
-    if (ret) {
-        return ret;
-    }
-
-    return OS_OK;
-}
+// U32 TaskTest()
+// {
+//     U32 ret;
+//     U8 ptNo = OS_MEM_DEFAULT_FSC_PT;
+//     struct TskInitParam param = {0};
+//     TskHandle testTskHandle[2];
+//     // task 2
+//     param.stackAddr = (uintptr_t)PRT_MemAllocAlign(0, ptNo, 0x2000, MEM_ADDR_ALIGN_016);
+//     param.taskEntry = (TskEntryFunc)Test2TaskEntry;
+//     param.taskPrio = 20;
+//     param.name = "Test2Task";
+//     param.stackSize = 0x2000;
+//     ret = PRT_TaskCreate(&testTskHandle[0], &param);
+//     if (ret) {
+//         return ret;
+//     }
+//     ret = PRT_TaskResume(testTskHandle[0]);
+//     if (ret) {
+//         return ret;
+//     }
+//     // task 3
+//     param.stackAddr = (uintptr_t)PRT_MemAllocAlign(0, ptNo, 0x2000, MEM_ADDR_ALIGN_016);
+//     param.taskEntry = (TskEntryFunc)Test3TaskEntry;
+//     param.taskPrio = 25;
+//     param.name = "Test3Task";
+//     param.stackSize = 0x2000;
+//     ret = PRT_TaskCreate(&testTskHandle[1], &param);
+//     if (ret) {
+//         return ret;
+//     }
+//     ret = PRT_TaskResume(testTskHandle[1]);
+//     if (ret) {
+//         return ret;
+//     }
+//     return OS_OK;
+// }
 
 U32 OsTestInit(void)
 {
@@ -286,6 +281,25 @@ U32 OsTestInit(void)
     
     ret = PRT_TaskResume(g_testTskHandle);
     if (ret) {
+        return ret;
+    }
+
+    struct TskInitParam param2 = {0};
+    param2.stackAddr = PRT_MemAllocAlign(0, ptNo, 0x5000, MEM_ADDR_ALIGN_016);
+    param2.taskEntry = (TskEntryFunc)ControlTaskEntry;
+    param2.taskPrio = 25;
+    param2.name = "ControlTask";
+    param2.stackSize = 0x5000;
+
+    ret = PRT_TaskCreate(&g_CtlTskHandel, &param2);
+    if (ret)
+    {
+        return ret;
+    }
+
+    ret = PRT_TaskResume(g_CtlTskHandel);
+    if (ret)
+    {
         return ret;
     }
 
