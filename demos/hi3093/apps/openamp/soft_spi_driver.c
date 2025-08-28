@@ -1,23 +1,35 @@
 #include <stdint.h>
 #include <unistd.h>
-#include "hi_spi.h"
-#include "gpio_def.h"
+#include "soft_spi_driver.h"
+#include "gpio_driver.h"
+#include "gpio_pin_define.h"
 #include "bm_gpio.h"
-#include "prt_hwi.h"
-#include "test.h"
+
+#define BUFFER_SIZE 32
+
+#define SPI0_CE0_HIGH GPIO_SET_PIN(SPI0_CE0)
+#define SPI0_CE0_LOW GPIO_CLEAR_PIN(SPI0_CE0)
+#define SPI0_CE1_HIGH GPIO_SET_PIN(SPI0_CE1)
+#define SPI0_CE1_LOW GPIO_CLEAR_PIN(SPI0_CE1)
+#define SPI0_SCK_HIGH GPIO_SET_PIN(SPI0_SCLK)
+#define SPI0_SCK_LOW GPIO_CLEAR_PIN(SPI0_SCLK)
+#define SPI0_MOSI_HIGH GPIO_SET_PIN(SPI0_MOSI)
+#define SPI0_MOSI_LOW GPIO_CLEAR_PIN(SPI0_MOSI)
+
+#define SPI0_MISO_READ gpio_getvalue(SPI0_MISO)
 
 // SPI初始化函数
-void SPI0_Init(void)
+void spi0_init(void)
 {
-    GPIO_INIT(GPIO_GROUP1, DAC8563_CS_PIN, GPIO_OUTPUT); // DAC8563 CS pin
-    GPIO_INIT(GPIO_GROUP1, AD7606_CS_PIN, GPIO_OUTPUT);  // AD7606 CS pin
-    GPIO_INIT(GPIO_GROUP1, SPI0_SCLK, GPIO_OUTPUT);      // SPI0
-    GPIO_INIT(GPIO_GROUP1, SPI0_MOSI, GPIO_OUTPUT);      // SPI0
-    GPIO_INIT(GPIO_GROUP1, SPI0_MISO, GPIO_INPUT);       // SPI0
+    gpio_init(GPIO_GROUP1, DAC8563_CS_PIN, GPIO_OUTPUT); // DAC8563 CS pin
+    gpio_init(GPIO_GROUP1, AD7606_CS_PIN, GPIO_OUTPUT);  // AD7606 CS pin
+    gpio_init(GPIO_GROUP1, SPI0_SCLK, GPIO_OUTPUT);      // SPI0
+    gpio_init(GPIO_GROUP1, SPI0_MOSI, GPIO_OUTPUT);      // SPI0
+    gpio_init(GPIO_GROUP1, SPI0_MISO, GPIO_INPUT);       // SPI0
 }
 
 // ================== SPI模式0 (CPHA=0) 驱动 ADC ==================
-void spi0_AD_receive(uint8_t *rx_buf, size_t length)
+void spi0_adc_receive(uint8_t *rx_buf, size_t length)
 {
     // 片选使能
     SPI0_CE0_LOW;
@@ -49,7 +61,7 @@ void spi0_AD_receive(uint8_t *rx_buf, size_t length)
 }
 
 // ================== SPI模式1 (CPHA=1) 驱动 DAC ==================
-void spi0_DA_transfer(const uint8_t *tx_buf, size_t length)
+void spi0_dac_transfer(const uint8_t *tx_buf, size_t length)
 {
     static byte_idx = 0;
     static uint8_t tx_byte = 0x0;

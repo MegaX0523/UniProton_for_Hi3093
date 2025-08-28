@@ -1,13 +1,14 @@
 #include <stdint.h>
-#include "gpio_def.h"
+#include "gpio_pin_define.h"
 #include "bm_gpio.h"
 
-static int tmp;
+#define GPIO1_OUTPUT_REG *(volatile uint32_t*)(GPIO1_BASE_ADDR + GPIO_OUTPUT_OFFSET_ADDR)
+#define GPIO1_INPUT_REG *(volatile uint32_t*)(GPIO1_BASE_ADDR + GPIO_INPUT_OFFSET_ADDR)
 
 // Function to initialize GPIO pin
-void GPIO_INIT(int group, int pin, int mode)
+void gpio_init(int group, int pin, int mode)
 {
-    
+    static int tmp;
     bm_gpio_init(group, pin);
     if (mode == GPIO_INPUT) {
         bm_gpio_get_level(group, pin, &tmp); // Set pin low for input
@@ -23,19 +24,8 @@ void GPIO_INIT(int group, int pin, int mode)
     }
 }
 
-// Function to set GPIO output value
-// void GPIO_SET_PIN(int pin)
-// {
-//     GPIO1_OUTPUT_REG |= (1 << pin); // Set the specified pin high
-// }
-
-// inline void GPIO_CLEAR_PIN(int pin)
-// {
-//     GPIO1_OUTPUT_REG &= ~(1 << pin); // Set the specified pin low
-// }
-
 // Function to read GPIO input value
-inline int GPIO_GETVALUE(int pin)
+inline int gpio_getvalue(int pin)
 {
     return (GPIO1_INPUT_REG & (1 << pin)) ? GPIO_LEVEL_HIGH : GPIO_LEVEL_LOW; // Read the specified pin value
 }

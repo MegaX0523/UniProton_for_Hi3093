@@ -5,7 +5,7 @@
 #define REG(addr) (*(volatile uint32_t *)(GPIO_BASE + addr))
 
 // Function to initialize GPIO pin
-void GPIO_INIT(int pin, int mode)
+void gpio_init(int pin, int mode)
 {
     int reg_offset = (pin / 10) * 4;     // Calculate GPFSEL register offset
     int bit_offset = (pin % 10) * 3;     // Calculate bit position within register
@@ -17,7 +17,7 @@ void GPIO_INIT(int pin, int mode)
 }
 
 // Function to set GPIO output value
-void GPIO_SET(int pin, int value)
+void gpio_set(int pin, int value)
 {
     if (value)
         GPSET0 |= (1 << pin); // Set the pin if value is 1
@@ -26,7 +26,7 @@ void GPIO_SET(int pin, int value)
 }
 
 // Function to read GPIO input value
-int GPIO_GETVALUE(int pin)
+int gpio_getvalue(int pin)
 {
     uint32_t level = REG(0x34);      // GPLEV0 register
     return (level & (1 << pin)) ? 1 : 0;

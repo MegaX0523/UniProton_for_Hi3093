@@ -1,0 +1,15 @@
+{
+    "files.associations": {
+        "*.dts": "c",
+        "*.ld": "c",
+        "gpio_def.h": "c",
+        "gpio_driver.h": "c",
+        "test.h": "c",
+        "gpio_pin_define.h": "c",
+        "soft_spi_driver.h": "c",
+        "stdint.h": "c",
+        "shell.h": "c",
+        "vibration_control.h": "c",
+        "ctltask.h": "c"
+    }
+}
