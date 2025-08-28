@@ -9,8 +9,10 @@
 #include "prt_task.h"
 #include "test.h"
 #include "rpmsg_backend.h"
+#include "ctltask.h"
 
 TskHandle g_testTskHandle;
+TskHandle g_CtlTskHandel;
 U8 g_memRegion00[OS_MEM_FSC_PT_SIZE];
 
 #if defined(OS_OPTION_OPENAMP)
@@ -55,6 +57,25 @@ U32 OsTestInit(void)
 
     ret = PRT_TaskResume(g_testTskHandle);
     if (ret) {
+        return ret;
+    }
+
+    struct TskInitParam param2 = {0};
+    param2.stackAddr = PRT_MemAllocAlign(0, ptNo, 0x5000, MEM_ADDR_ALIGN_064);
+    param2.taskEntry = (TskEntryFunc)ControlTaskEntry;
+    param2.taskPrio = 25;
+    param2.name = "ControlTask";
+    param2.stackSize = 0x5000;
+
+    ret = PRT_TaskCreate(&g_CtlTskHandel, &param2);
+    if (ret)
+    {
+        return ret;
+    }
+
+    ret = PRT_TaskResume(g_CtlTskHandel);
+    if (ret)
+    {
         return ret;
     }
 
