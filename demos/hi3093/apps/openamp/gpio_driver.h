@@ -1,5 +1,8 @@
 #pragma once
 
+#define GPIO1_OUTPUT_REG *(volatile uint32_t*)(GPIO1_BASE_ADDR + GPIO_OUTPUT_OFFSET_ADDR)
+#define GPIO1_INPUT_REG *(volatile uint32_t*)(GPIO1_BASE_ADDR + GPIO_INPUT_OFFSET_ADDR)
+
 #define GPIO_SET_PIN(pin)                      \
     do                                     \
     {                                      \

@@ -21,15 +21,17 @@ extern bool state_excitation_flag;
 extern bool state_control_flag;
 extern bool state_secondary_path_identify_flag;
 
-static int timer_interval = 500;
-static uint sensor_array_index = 0;
-static int sensor_array[200] = {0};
+static uint16_t timer_interval = 500;
+static uint16_t sensor_array_index = 0;
+SensorArray sensor_array = {0};
 
-struct sin_args
+typedef struct sin_args
 {
-    double phase = 0.0;
-    double excitation_freq = 66.07;
+    double phase;
+    double excitation_freq;
 } sin_arg;
+
+sin_arg sin_param = {0.0, 66.07}; 
 
 extern int send_message(unsigned char *message, int len);
 
@@ -40,13 +42,21 @@ static void timer_callback(TimerHandle tmrHandle, U32 arg1, U32 arg2, U32 arg3, 
     return;
 }
 
-static double get_sin_value(void)
+void change_sin_pram(double freq)
 {
-    double value = sin(sin_arg.phase);
-    sin_arg.phase += 2 * PI * sin_arg.excitation_freq / timer_interval;
-    while (sin_arg.phase >= 2 * PI)
+    sin_param.phase = 0.0;
+    sin_param.excitation_freq = freq;
+}
+
+double get_sin_value(void)
+{
+    #define PI 3.141592653
+
+    double value = sin(sin_param.phase);
+    sin_param.phase += 2 * PI * sin_param.excitation_freq / timer_interval;
+    while (sin_param.phase >= 2 * PI)
     {
-        sin_arg.phase -= 2 * PI;
+        sin_param.phase -= 2 * PI;
     }
     return value;
 }

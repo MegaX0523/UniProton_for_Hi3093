@@ -1,6 +1,7 @@
 #include "rpmsg_protocol.h"
 #include "soft_spi_device.h"
 #include "vibration_control.h"
+#include "stdbool.h"
 
 #define OUTPUT_VOLTAGE_OFFSET 5.0
 
@@ -8,6 +9,11 @@ bool state_idle_flag = true;        // ¿ÕÏĞ×´Ì¬
 bool state_excitation_flag = false; // ¼¤Àø×´Ì¬
 bool state_control_flag = false;
 bool state_secondary_path_identify_flag = false;
+
+extern SensorArray sensor_array;
+
+extern double get_sin_value(void);
+extern void change_sin_pram(double freq);
 
 int rec_msg_proc(void *data, int len)
 {
@@ -52,11 +58,15 @@ int rec_msg_proc(void *data, int len)
                 PRT_Printf("Sending test array.\n", packet->payload.command);
                 for (uint16_t i = 0; i < SENSOR_ARRAY_SIZE; i++)
                 {
-                    sensor_array[i] = (int16_t)(get_sin_value(i) * 0x7FFF); // Ê¾ÀıÊı¾İ
-                    PRT_Printf("%d", sensor_array[i]);
+                    double value = get_sin_value(); // Ê¾ÀıÊı¾İ
+                    sensor_array[i] = (int16_t)(value * 0x7FFF);
+                    PRT_Printf("%.4lf ", value);
                     if ((i + 1) % 16 == 0)
+                    {
                         PRT_Printf("\n");
+                    }
                 }
+                change_sin_pram(66.07);
                 PRT_Printf("\n");
                 send_sensor_array();
             }
@@ -70,8 +80,7 @@ int rec_msg_proc(void *data, int len)
                        len);
             if (packet->payload.param.param_id == PARAM_FREQUENCY)
             {
-                sin_arg.phase = 0;
-                sin_arg.excitation_freq = packet->payload.param.param_value;
+                change_sin_pram(packet->payload.param.param_value);
             }
         }
         break;

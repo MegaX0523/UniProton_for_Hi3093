@@ -2,14 +2,12 @@
 
 static void static_deque_init(StaticDeque *deque);
 static DequeNode *static_node_alloc(double data);
-static int deque_push_front(StaticDeque *deque, double data);
-
-
+static void deque_push_front(StaticDeque *deque, double data);
 
 static int node_index = 0;
-static double weight[LMS_M] = {0};      // 滤波器系数
-static double weight_sec_p[LMS_M] = {0};  // 次级通道参数
-static double mu = MU_MAX; // 步长参数
+static double weight[LMS_M] = {0};       // 滤波器系数
+static double weight_sec_p[LMS_M] = {0}; // 次级通道参数
+static double mu = MU_MAX;               // 步长参数
 
 static DequeNode node_pool[MAX_DEQUE_SIZE];
 static StaticDeque lms_deque = {0};
@@ -45,7 +43,9 @@ static void static_deque_init(StaticDeque *deque)
 static DequeNode *static_node_alloc(double data)
 {
     if (node_index >= MAX_DEQUE_SIZE)
+    {
         node_index = 0;
+    }
     DequeNode *node = &node_pool[node_index++];
     node->data = data;
     node->prev = NULL;
@@ -64,7 +64,7 @@ static void deque_push_front(StaticDeque *deque, double data)
         deque->rear->next = NULL;
         deque->size--;
     }
-    else if (deque->size == 0)  // 仅在刚初始化后执行
+    else if (deque->size == 0) // 仅在刚初始化后执行
     {
         deque->front = deque->rear = node;
         deque->size = 1;
@@ -115,11 +115,11 @@ double output_get(double ref_signal)
         static_deque_init(&lms_deque);
         initialized = 1;
     }
-    
+
     current = lms_deque.front;
     for (int i = 0; i < LMS_M && current; i++)
     {
-        ref_filtered_signal += W_sec[i] * current.data[i];
+        ref_filtered_signal += weight_sec_p[i] * current->data;
         current = current->next;
     }
     deque_push_front(&lms_deque, ref_filtered_signal);
@@ -127,7 +127,7 @@ double output_get(double ref_signal)
     current = lms_deque.front;
     for (int i = 0; i < LMS_M && current; i++)
     {
-        sum += current->data * W[i];
+        sum += current->data * weight[i];
         current = current->next;
     }
     return sum;
@@ -142,5 +142,5 @@ void update_input_deque_only(double exc_signal)
         initialized = 1;
     }
 
-    deque_push_front(&spi_deque, exc_signal)
+    deque_push_front(&spi_deque, exc_signal);
 }

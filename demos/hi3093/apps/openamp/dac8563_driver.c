@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "gpio_def.h"
+#include "gpio_pin_define.h"
 #include "gpio_driver.h"
 #include "soft_spi_driver.h"
 #include "bm_gpio.h"
@@ -14,7 +14,7 @@
 void dac8563_write(uint8_t cmd, uint16_t data)
 {
     uint8_t transferdata[3];
-    uint8_t receivedata[3];
+    // uint8_t receivedata[3];
     transferdata[0] = cmd; // Command byte
     transferdata[1] = (data >> 8) & 0xFF; // High byte of data
     transferdata[2] = data & 0xFF; // Low byte of data

@@ -33,9 +33,7 @@ double output_get(double ref_signal);
 void update_input_deque_only(double exc_signal);
 
 void weight_update(double err_signal);
-void weight_sec_p_update(double err_signal)
-
-
+void weight_sec_p_update(double err_signal);
 
 #endif
 

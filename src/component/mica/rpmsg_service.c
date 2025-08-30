@@ -23,7 +23,7 @@
 #endif
 #include "prt_config.h"
 #include "../proxy/rpc_internal_model.h"
-#include "ctltask.h"
+#include "vibration_control.h"
 
 typedef struct umt_send_msg
 {
@@ -197,7 +197,7 @@ static int rpmsg_rx_umt_callback(struct rpmsg_endpoint *ept, void *data,
 {
     struct rpmsg_rcv_msg *umt_msg = priv;
     umt_send_msg_t *msg;
-    int ret = 0;
+    // int ret = 0;
 
     rpmsg_hold_rx_buffer(ept, data);
     umt_msg->data = data;
