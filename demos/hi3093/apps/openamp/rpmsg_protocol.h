@@ -2,47 +2,47 @@
 #include <stdint.h>
 #include <unistd.h>
 
-// Ö¸ÁîÀàĞÍ¶¨Òå (Linux -> ÊµÊ±¶Ë)
+// æŒ‡ä»¤ç±»å‹å®šä¹‰ (Linux -> å®æ—¶ç«¯)
 typedef enum {
     START_EXCITATION = 0xC1,
     STOP_EXCITATION  = 0xC2,
-    START_CONTROL   = 0xC3, // ¿ØÖÆ¼¤Àø
-    STOP_CONTROL    = 0xC4, // Í£Ö¹¿ØÖÆ
+    START_CONTROL   = 0xC3, // æ§åˆ¶æ¿€åŠ±
+    STOP_CONTROL    = 0xC4, // åœæ­¢æ§åˆ¶
     START_DAMPING    = 0xC5,
     STOP_DAMPING     = 0xC6
 } cmd_type;
 
-// ÏûÏ¢ÀàĞÍ¶¨Òå (Ë«Ïò¶ÀÁ¢)
+// æ¶ˆæ¯ç±»å‹å®šä¹‰ (åŒå‘ç‹¬ç«‹)
 typedef enum {
-    MSG_COMMAND       = 0xA1, // Linux->ÊµÊ±¶Ë: ¿ØÖÆÖ¸Áî
-    MSG_SET_PARAM     = 0xB1, // Linux->ÊµÊ±¶Ë: ²ÎÊıÉèÖÃ
-    MSG_SENSOR_ARRAY  = 0xC1  // ÊµÊ±¶Ë->Linux: ´«¸ĞÆ÷Êı×é
+    MSG_COMMAND       = 0xA1, // Linux->å®æ—¶ç«¯: æ§åˆ¶æŒ‡ä»¤
+    MSG_SET_PARAM     = 0xB1, // Linux->å®æ—¶ç«¯: å‚æ•°è®¾ç½®
+    MSG_SENSOR_ARRAY  = 0xC1  // å®æ—¶ç«¯->Linux: ä¼ æ„Ÿå™¨æ•°ç»„
 } msg_Type;
 
 typedef enum 
 {
-    PARAM_STEP_SIZE = 0x01,    // ²½³¤
-    PARAM_FREQUENCY = 0x02, // ÆµÂÊ
+    PARAM_STEP_SIZE = 0x01,    // æ­¥é•¿
+    PARAM_FREQUENCY = 0x02, // é¢‘ç‡
 }param_type;
 
-// ²ÎÊıÉèÖÃ¸ºÔØ½á¹¹  
+// å‚æ•°è®¾ç½®è´Ÿè½½ç»“æ„  
 #pragma pack(push, 1)
 typedef struct {
-    uint32_t param_id;  // ²ÎÊı±êÊ¶·û
-    double param_value; // ²ÎÊıÖµ
+    uint32_t param_id;  // å‚æ•°æ ‡è¯†ç¬¦
+    double param_value; // å‚æ•°å€¼
 } ParamPayload;
 
-// ´«¸ĞÆ÷Êı×é¸ºÔØ½á¹¹
+// ä¼ æ„Ÿå™¨æ•°ç»„è´Ÿè½½ç»“æ„
 #define SENSOR_ARRAY_SIZE 200
 typedef int16_t SensorArray[SENSOR_ARRAY_SIZE];
 #pragma pack(pop)
 
-// Êı¾İ°üÍ¨ÓÃ½á¹¹
+// æ•°æ®åŒ…é€šç”¨ç»“æ„
 typedef struct {
-    uint16_t msg_type;   // ÏûÏ¢ÀàĞÍ
+    uint16_t msg_type;   // æ¶ˆæ¯ç±»å‹
     union {
-        uint16_t command;       // MSG_COMMAND¸ºÔØ
-        ParamPayload param;    // MSG_SET_PARAM¸ºÔØ
-        SensorArray array;     // MSG_SENSOR_ARRAY¸ºÔØ
+        uint16_t command;       // MSG_COMMANDè´Ÿè½½
+        ParamPayload param;    // MSG_SET_PARAMè´Ÿè½½
+        SensorArray array;     // MSG_SENSOR_ARRAYè´Ÿè½½
     } payload;
 } rpmsg_packet;

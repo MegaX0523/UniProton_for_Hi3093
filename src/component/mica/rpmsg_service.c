@@ -122,7 +122,7 @@ static int rpmsg_rx_tty_callback(struct rpmsg_endpoint *ept, void *data,
     tty_msg->len = len;
     rec_msg_proc(data, len);
     rpmsg_release_rx_buffer(ept, data);
-    PRT_SemPost(tty_sem);
+    // PRT_SemPost(tty_sem);
 
     return 0;
 }

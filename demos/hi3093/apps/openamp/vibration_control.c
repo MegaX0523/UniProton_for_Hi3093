@@ -8,6 +8,7 @@
 #include "soft_spi_device.h"
 #include "rpmsg_protocol.h"
 #include "filter.h"
+#include "send_array.h"
 
 #define OUTPUT_VOLTAGE_OFFSET 5.0
 
@@ -110,7 +111,8 @@ void vibration_control()
         if (sensor_array_index >= SENSOR_ARRAY_SIZE)
         {
             sensor_array_index = 0;
-            send_sensor_array();
+            // send_sensor_array();
+            PRT_SemPost(send_array_sem);
         }
         else
         {
@@ -136,13 +138,7 @@ void secondary_path_identify()
     weight_sec_p_update(err_signal);
 }
 
-void send_sensor_array()
-{
-    rpmsg_packet pkt = {
-        .msg_type = MSG_SENSOR_ARRAY};
-    __real_memcpy(pkt.payload.array, sensor_array, sizeof(SensorArray));
-    send_message(((uint8_t *)&pkt), sizeof(pkt.msg_type) + sizeof(SensorArray));
-}
+
 
 void clear_env()
 {

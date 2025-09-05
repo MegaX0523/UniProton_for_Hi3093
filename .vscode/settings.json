@@ -10,6 +10,9 @@
         "stdint.h": "c",
         "shell.h": "c",
         "vibration_control.h": "c",
-        "ctltask.h": "c"
+        "ctltask.h": "c",
+        "prt_timer.h": "c",
+        "rpmsg_protocol.h": "c",
+        "filter.h": "c"
     }
 }

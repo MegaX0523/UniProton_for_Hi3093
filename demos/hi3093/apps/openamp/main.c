@@ -18,6 +18,8 @@
 TskHandle g_sampleHandle[2];
 TskHandle g_CtlTskHandel;
 TskHandle g_testTskHandle;
+TskHandle g_SendArrayHandle;
+TskHandle g_RecMsgTskHandel;
 U8 g_memRegion00[OS_MEM_FSC_PT_SIZE];
 
 extern U32 PRT_PrintfInit();
@@ -270,7 +272,7 @@ U32 OsTestInit(void)
     
     param.stackAddr = (uintptr_t)PRT_MemAllocAlign(0, ptNo, 0x3000, MEM_ADDR_ALIGN_016);
     param.taskEntry = (TskEntryFunc)TestTaskEntry;
-    param.taskPrio = 25;
+    param.taskPrio = 22;
     param.name = "TestTask";
     param.stackSize = 0x3000;
 
@@ -284,10 +286,11 @@ U32 OsTestInit(void)
         return ret;
     }
 
+    // 振动控制任务
     struct TskInitParam param2 = {0};
-    param2.stackAddr = PRT_MemAllocAlign(0, ptNo, 0x5000, MEM_ADDR_ALIGN_016);
+    param2.stackAddr = PRT_MemAllocAlign(0, ptNo, 0x4000, MEM_ADDR_ALIGN_016);
     param2.taskEntry = (TskEntryFunc)control_task_entry;
-    param2.taskPrio = 25;
+    param2.taskPrio = 24;
     param2.name = "ControlTask";
     param2.stackSize = 0x5000;
 
@@ -298,6 +301,46 @@ U32 OsTestInit(void)
     }
 
     ret = PRT_TaskResume(g_CtlTskHandel);
+    if (ret)
+    {
+        return ret;
+    }
+
+    // 接收指令任务
+    struct TskInitParam param3 = {0};
+    param3.stackAddr = PRT_MemAllocAlign(0, ptNo, 0x2000, MEM_ADDR_ALIGN_016);
+    param3.taskEntry = (TskEntryFunc)receive_msg_entry;
+    param3.taskPrio = 23;
+    param3.name = "RecevMsgTask";
+    param3.stackSize = 0x2000;
+
+    ret = PRT_TaskCreate(&g_RecMsgTskHandel, &param3);
+    if (ret)
+    {
+        return ret;
+    }
+
+    ret = PRT_TaskResume(g_RecMsgTskHandel);
+    if (ret)
+    {
+        return ret;
+    }
+
+    // 发送传感器数据任务
+    struct TskInitParam param4 = {0};
+    param4.stackAddr = PRT_MemAllocAlign(0, ptNo, 0x2000, MEM_ADDR_ALIGN_016);
+    param4.taskEntry = (TskEntryFunc)sendarray_task_entry;
+    param4.taskPrio = 25;
+    param4.name = "SendArrayTask";
+    param4.stackSize = 0x2000;
+
+    ret = PRT_TaskCreate(&g_SendArrayHandle, &param4);
+    if (ret)
+    {
+        return ret;
+    }
+
+    ret = PRT_TaskResume(g_SendArrayHandle);
     if (ret)
     {
         return ret;
