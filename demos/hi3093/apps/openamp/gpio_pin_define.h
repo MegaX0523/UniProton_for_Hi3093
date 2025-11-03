@@ -5,10 +5,10 @@
 #define GPIO47 15   // 47 - 32
 #define GPIO48 16   // 48 - 32
 #define GPIO49 17   // 49 - 32
+#define GPIO50 18   // 50 - 32
 #define GPIO51 19   // 51 - 32
 #define GPIO52 20   // 52 - 32
 #define GPIO53 21   // 53 - 32
-#define GPIO54 22   // 54 - 32
 
 // GPIO pin modes
 #define GPIO_INPUT 0b000
@@ -43,10 +43,10 @@
 #define GPIO_INPUT_OFFSET_ADDR        0x50 /* INPUT register */
 
 #define AD7606_CS_PIN SPI0_CE0   // Chip Select pin for AD7606
-#define AD7606_CONVST_PIN GPIO51 // Conversion start pin
-#define AD7606_RESET_PIN GPIO52  // Reset pin
-#define AD7606_BUSY_PIN GPIO53   // Busy signal pin
+#define AD7606_CONVST_PIN GPIO50 // Conversion start pin
+#define AD7606_RESET_PIN GPIO51  // Reset pin
+#define AD7606_BUSY_PIN GPIO52   // Busy signal pin
 
 #define DAC8563_CS_PIN SPI0_CE1 // Chip Select pin for DAC8563
 #define DAC8563_SYNC_PIN SPI0_CE1 // Sync pin for DAC8563
-#define DAC8563_LDAC_PIN GPIO54 // LDAC pin for DAC8563
+#define DAC8563_LDAC_PIN GPIO53 // LDAC pin for DAC8563

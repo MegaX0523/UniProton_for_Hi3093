@@ -35,25 +35,27 @@ int rec_msg_proc(void *data, int len)
                 PRT_Printf("Received command: START_EXCITATION\n");
                 dac8563_setvoltage(DAC_EXCITATION_CHANNEL, OUTPUT_VOLTAGE_OFFSET);
                 dac8563_setvoltage(DAC_CONTROL_CHANNEL, OUTPUT_VOLTAGE_OFFSET);
-                state_excitation_flag = 1;
+                state_excitation_flag = true;
                 break;
             case STOP_EXCITATION: // Í£Ö¹¼¤Àø
                 PRT_Printf("Received command: STOP_EXCITATION\n");
-                state_excitation_flag = 0;
-                state_control_flag = 0;
+                state_excitation_flag = false;
+                state_control_flag = false;
                 dac8563_setvoltage(DAC_EXCITATION_CHANNEL, 0);
                 dac8563_setvoltage(DAC_CONTROL_CHANNEL, 0);
                 break;
             case START_CONTROL: // ¿ªÊ¼¿ØÖÆ
                 PRT_Printf("Received command: START_CONTROL\n");
-                if (state_excitation_flag == 1)
+                if (state_excitation_flag == true)
                 {
-                    state_control_flag = 1;
+                    state_control_flag = true;
                 }
+                break;
             case STOP_CONTROL: //  Í£Ö¹¿ØÖÆ
                 PRT_Printf("Received command: STOP_CONTROL\n");
                 state_control_flag = 0;
                 dac8563_setvoltage(DAC_CONTROL_CHANNEL, 0);
+                break;
             case START_DAMPING:
                 PRT_Printf("Sending test array.\n", packet->payload.command);
                 for (uint16_t i = 0; i < SENSOR_ARRAY_SIZE; i++)
@@ -71,6 +73,7 @@ int rec_msg_proc(void *data, int len)
                 send_sensor_array();
             }
         }
+        break;
     case MSG_SET_PARAM:
         if (len >= sizeof(uint16_t) + sizeof(ParamPayload))
         {

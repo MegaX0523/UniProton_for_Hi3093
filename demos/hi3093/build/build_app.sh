@@ -47,3 +47,5 @@ else
 fi
 
 rm -rf $TMP_DIR
+
+cp hi3093.elf /home/uniproton/nfsfolder/HI3093/

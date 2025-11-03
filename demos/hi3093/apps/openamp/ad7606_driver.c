@@ -13,27 +13,24 @@ void adc7606_init(void)
     gpio_init(GPIO_GROUP1,AD7606_BUSY_PIN, GPIO_INPUT);     // Initialize BUSY pin as input (optional, if needed)
     
     GPIO_SET_PIN(AD7606_RESET_PIN);   // Reset high
-    // for (volatile int i = 0; i < 100; i++);  // Simple delay loop (adjust as needed)
+    for (volatile int i = 0; i < 100; i++);  // Simple delay loop (adjust as needed)
     GPIO_CLEAR_PIN(AD7606_RESET_PIN);   // Reset low
-}
-
-// Start conversion
-static void adc7606_startconversion(void)
-{
-    GPIO_CLEAR_PIN(AD7606_CONVST_PIN);  // CONVST low to start conversion
-    // for (volatile int i = 0; i < 50; i++);  // Simple delay loop (adjust as needed)
-    GPIO_SET_PIN(AD7606_CONVST_PIN);  // CONVST back to high
 }
 
 void adc7606_read_ref_signal(uint8_t* data)
 {
-    int timeout = 1000;
-    adc7606_startconversion();
-    for (volatile int j = 0; j < 20; j++);
+    int timeout = 10;
+
+    // start conversion
+    GPIO_CLEAR_PIN(AD7606_CONVST_PIN);  // CONVST low to start conversion
+    // for (volatile int i = 0; i < 100; i++);  // Simple delay loop (adjust as needed)
+    GPIO_SET_PIN(AD7606_CONVST_PIN);  // CONVST back to high
+
     while (gpio_getvalue(AD7606_BUSY_PIN) == GPIO_LEVEL_HIGH)
     {
         if (timeout-- == 0) {
-            return;
+            // return;
+            break;
         }
     }
     spi0_adc_receive(data, 2);

@@ -21,7 +21,7 @@ extern bool state_excitation_flag;
 extern bool state_control_flag;
 extern bool state_secondary_path_identify_flag;
 
-static uint16_t timer_interval = 500;
+static uint16_t timer_interval = 100;
 static uint16_t sensor_array_index = 0;
 SensorArray sensor_array = {0};
 

@@ -58,6 +58,7 @@ void spi0_adc_receive(uint8_t *rx_buf, size_t length)
     }
     // 片选禁用
     SPI0_CE0_HIGH;
+    SPI0_MOSI_LOW;
 }
 
 // ================== SPI模式1 (CPHA=1) 驱动 DAC ==================
