@@ -1,9 +1,11 @@
+#include "soft_spi_driver.h"
+
 #include <stdint.h>
 #include <unistd.h>
-#include "soft_spi_driver.h"
+
+#include "bm_gpio.h"
 #include "gpio_driver.h"
 #include "gpio_pin_define.h"
-#include "bm_gpio.h"
 
 #define BUFFER_SIZE 32
 
@@ -19,40 +21,35 @@
 #define SPI0_MISO_READ gpio_getvalue(SPI0_MISO)
 
 // SPI初始化函数
-void spi0_init(void)
-{
-    gpio_init(GPIO_GROUP1, DAC8563_CS_PIN, GPIO_OUTPUT); // DAC8563 CS pin
-    gpio_init(GPIO_GROUP1, AD7606_CS_PIN, GPIO_OUTPUT);  // AD7606 CS pin
-    gpio_init(GPIO_GROUP1, SPI0_SCLK, GPIO_OUTPUT);      // SPI0
-    gpio_init(GPIO_GROUP1, SPI0_MOSI, GPIO_OUTPUT);      // SPI0
-    gpio_init(GPIO_GROUP1, SPI0_MISO, GPIO_INPUT);       // SPI0
+void spi0_init(void) {
+    gpio_init(GPIO_GROUP1, DAC8563_CS_PIN, GPIO_OUTPUT);  // DAC8563 CS pin
+    gpio_init(GPIO_GROUP1, AD7606_CS_PIN, GPIO_OUTPUT);   // AD7606 CS pin
+    gpio_init(GPIO_GROUP1, SPI0_SCLK, GPIO_OUTPUT);       // SPI0
+    gpio_init(GPIO_GROUP1, SPI0_MOSI, GPIO_OUTPUT);       // SPI0
+    gpio_init(GPIO_GROUP1, SPI0_MISO, GPIO_INPUT);        // SPI0
 }
 
-// ================== SPI模式0 (CPHA=0) 驱动 ADC ==================
-void spi0_adc_receive(uint8_t *rx_buf, size_t length)
-{
+// ================== SPI模式3 驱动 ADC ==================
+void spi0_adc_receive(uint8_t* rx_buf, int length) {
     // 片选使能
+    SPI0_SCK_HIGH;
     SPI0_CE0_LOW;
     SPI0_MOSI_HIGH;
-    for (size_t byte_idx = 0; byte_idx < length; byte_idx++)
-    {
+    for (int byte_idx = 0; byte_idx < length; byte_idx++) {
         uint8_t rx_byte = 0;
         // 传输8位数据（MSB first）
-        for (int bit_idx = 7; bit_idx >= 0; bit_idx--)
-        {
-            // 时钟上升沿（从机采样）
-            SPI0_SCK_HIGH;
-            // 主机读取（从机在上升沿时已准备好数据）
-            if (SPI0_MISO_READ)
-            {
+        for (int bit_idx = 7; bit_idx >= 0; bit_idx--) {
+            // 时钟下降沿（从机采样）
+            SPI0_SCK_LOW;
+            // 主机读取
+            if (SPI0_MISO_READ) {
                 rx_byte |= (1 << bit_idx);
             }
-            // 时钟下降沿（为下一位准备）
-            SPI0_SCK_LOW;
+            // 时钟上升沿（为下一位准备）
+            SPI0_SCK_HIGH;
         }
         // 存储接收到的字节
-        if (rx_buf)
-        {
+        if (rx_buf) {
             rx_buf[byte_idx] = rx_byte;
         }
     }
@@ -61,37 +58,24 @@ void spi0_adc_receive(uint8_t *rx_buf, size_t length)
     SPI0_MOSI_LOW;
 }
 
-// ================== SPI模式1 (CPHA=1) 驱动 DAC ==================
-void spi0_dac_transfer(const uint8_t *tx_buf, size_t length)
-{
-    static byte_idx = 0;
+// ================== SPI模式3 驱动 DAC ==================
+void spi0_dac_transfer(const uint8_t* tx_buf, int length) {
     static uint8_t tx_byte = 0x0;
-    static int bit_idx = 7;
 
     SPI0_CE1_LOW;
-    for (byte_idx = 0; byte_idx < length; byte_idx++)
-    {
+    SPI0_SCK_HIGH;
+    for (int byte_idx = 0; byte_idx < length; byte_idx++) {
         tx_byte = tx_buf[byte_idx];
-
-        // 初始时钟为低（空闲状态）
-        SPI0_SCK_LOW;
-
         // 传输8位数据（MSB first）
-        for (bit_idx = 7; bit_idx >= 0; bit_idx--)
-        {
+        for (int bit_idx = 7; bit_idx >= 0; bit_idx--) {
             // 设置MOSI（在时钟上升前准备数据）
-            if(tx_byte & (1 << bit_idx))
-            {
-                SPI0_MOSI_HIGH; // 发送1
+            if (tx_byte & (1 << bit_idx)) {
+                SPI0_MOSI_HIGH;  // 发送1
+            } else {
+                SPI0_MOSI_LOW;  // 发送0
             }
-            else
-            {
-                SPI0_MOSI_LOW; // 发送0
-            }
-            // 时钟上升沿（从机在此刻改变输出）
-            SPI0_SCK_HIGH;
-            // 时钟下降沿（从机采样输入）
             SPI0_SCK_LOW;
+            SPI0_SCK_HIGH;
         }
     }
 

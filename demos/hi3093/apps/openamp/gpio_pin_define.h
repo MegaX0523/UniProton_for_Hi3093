@@ -25,11 +25,17 @@
 #define GPIO_LEVEL_LOW 0
 
 // Define GPIO pins (arbitrary assignments)
-#define SPI0_CE1 GPIO32
-#define SPI0_CE0 GPIO33
-#define SPI0_MISO GPIO47
-#define SPI0_MOSI GPIO48
-#define SPI0_SCLK GPIO49
+#define SPI0_CE0 GPIO32
+#define SPI0_MISO GPIO33
+#define AD7606_CONVST_PIN GPIO47
+#define AD7606_RESET_PIN GPIO48
+#define AD7606_BUSY_PIN GPIO49 
+
+#define SPI0_SCLK GPIO50
+
+#define SPI0_CE1 GPIO51
+#define SPI0_MOSI GPIO52
+#define DAC8563_LDAC_PIN GPIO53
 
 #define GPIO_BASE_ADDR 0x0874A000
 #define GPIO0_BASE_ADDR 0x0874A000
@@ -43,10 +49,7 @@
 #define GPIO_INPUT_OFFSET_ADDR        0x50 /* INPUT register */
 
 #define AD7606_CS_PIN SPI0_CE0   // Chip Select pin for AD7606
-#define AD7606_CONVST_PIN GPIO50 // Conversion start pin
-#define AD7606_RESET_PIN GPIO51  // Reset pin
-#define AD7606_BUSY_PIN GPIO52   // Busy signal pin
+
 
 #define DAC8563_CS_PIN SPI0_CE1 // Chip Select pin for DAC8563
 #define DAC8563_SYNC_PIN SPI0_CE1 // Sync pin for DAC8563
-#define DAC8563_LDAC_PIN GPIO53 // LDAC pin for DAC8563

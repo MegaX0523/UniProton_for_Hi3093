@@ -287,7 +287,7 @@ U32 OsTestInit(void)
     struct TskInitParam param2 = {0};
     param2.stackAddr = PRT_MemAllocAlign(0, ptNo, 0x5000, MEM_ADDR_ALIGN_016);
     param2.taskEntry = (TskEntryFunc)control_task_entry;
-    param2.taskPrio = 25;
+    param2.taskPrio = 24;
     param2.name = "ControlTask";
     param2.stackSize = 0x5000;
 

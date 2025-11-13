@@ -19,18 +19,17 @@ void adc7606_init(void)
 
 void adc7606_read_ref_signal(uint8_t* data)
 {
-    int timeout = 10;
+    int timeout = 100;
 
     // start conversion
     GPIO_CLEAR_PIN(AD7606_CONVST_PIN);  // CONVST low to start conversion
-    // for (volatile int i = 0; i < 100; i++);  // Simple delay loop (adjust as needed)
     GPIO_SET_PIN(AD7606_CONVST_PIN);  // CONVST back to high
 
+    for (volatile int i = 0; i < 50; i++);  // Simple delay loop (adjust as needed)
     while (gpio_getvalue(AD7606_BUSY_PIN) == GPIO_LEVEL_HIGH)
     {
         if (timeout-- == 0) {
-            // return;
-            break;
+            return;
         }
     }
     spi0_adc_receive(data, 2);

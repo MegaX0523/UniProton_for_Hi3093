@@ -10,6 +10,10 @@
         "stdint.h": "c",
         "shell.h": "c",
         "vibration_control.h": "c",
-        "ctltask.h": "c"
+        "ctltask.h": "c",
+        "prt_task.h": "c",
+        "bm_gpio.h": "c",
+        "gpio.h": "c",
+        "valarray": "c"
     }
 }

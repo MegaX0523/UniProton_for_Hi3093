@@ -1,5 +1,7 @@
 #include "filter.h"
 
+// #define FxLMS
+
 static void static_deque_init(StaticDeque *deque);
 static DequeNode *static_node_alloc(double data);
 static void deque_push_front(StaticDeque *deque, double data);
@@ -91,14 +93,16 @@ void weight_sec_p_update(double err_signal)
 {
     double norm = 1e-8;
     DequeNode *current = spi_deque.front;
-    for (int i = 0; i < LMS_M && current; i++)
-    {
+    
+    // 计算范数
+    for (int i = 0; i < LMS_M && current; i++) {
         norm += current->data * current->data;
+        current = current->next;
     }
-
-    for (int i = 0; i < LMS_M && current; i++)
-    {
-        norm = current->data * current->data;
+    
+    // 重新从头开始遍历
+    current = spi_deque.front;
+    for (int i = 0; i < LMS_M && current; i++) {
         weight_sec_p[i] += (mu / norm) * err_signal * current->data;
         current = current->next;
     }
@@ -106,7 +110,7 @@ void weight_sec_p_update(double err_signal)
 
 double output_get(double ref_signal)
 {
-    double sum = 0;
+    double output = 0;
     double ref_filtered_signal = 0;
     static bool initialized = 0;
     DequeNode *current;
@@ -116,6 +120,7 @@ double output_get(double ref_signal)
         initialized = 1;
     }
 
+#ifdef FxLMS
     current = lms_deque.front;
     for (int i = 0; i < LMS_M && current; i++)
     {
@@ -123,14 +128,16 @@ double output_get(double ref_signal)
         current = current->next;
     }
     deque_push_front(&lms_deque, ref_filtered_signal);
-
+#else
+    deque_push_front(&lms_deque, ref_signal);
+#endif
     current = lms_deque.front;
     for (int i = 0; i < LMS_M && current; i++)
     {
-        sum += current->data * weight[i];
+        output += current->data * weight[i];
         current = current->next;
     }
-    return sum;
+    return output;
 }
 
 void update_input_deque_only(double exc_signal)

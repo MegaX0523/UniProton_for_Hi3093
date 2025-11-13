@@ -2,8 +2,8 @@
 
 #include <stdint.h>
 
-#define DAC_CONTROL_CHANNEL 0
-#define DAC_EXCITATION_CHANNEL 1
+#define DAC_EXCITATION_CHANNEL 0
+#define DAC_CONTROL_CHANNEL 1
 
 extern void spi0_init(void);
 

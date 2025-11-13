@@ -2,6 +2,7 @@
 #include "gpio_pin_define.h"
 #include "gpio_driver.h"
 #include "bm_gpio.h"
+// #include "gpio.h"
 
 // Function to initialize GPIO pin
 void gpio_init(int group, int pin, int mode)
@@ -9,6 +10,7 @@ void gpio_init(int group, int pin, int mode)
     static int tmp;
     bm_gpio_init(group, pin);
     if (mode == GPIO_INPUT) {
+        // gpio_set_reg_val(group, GPIO_DIR_OFFSET_ADDR, (1U << pin), 0);
         bm_gpio_get_level(group, pin, &tmp); // Set pin low for input
     } else if (mode == GPIO_OUTPUT) {
         if (pin == SPI0_SCLK || pin == AD7606_RESET_PIN)

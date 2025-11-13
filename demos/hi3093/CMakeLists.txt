@@ -55,6 +55,7 @@ include_directories(
     ${HOME_PATH}/src/shell/full/include
     ${HOME_PATH}/src/component/mica
     ${CMAKE_CURRENT_SOURCE_DIR}/drivers/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/drivers/gpio
     ${HOME_PATH}/src/arch/include
     ${HOME_PATH}/src/core/kernel/irq
     ${HOME_PATH}/src/core/kernel/include

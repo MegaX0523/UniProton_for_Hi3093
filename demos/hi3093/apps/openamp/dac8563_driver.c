@@ -14,10 +14,10 @@
 void dac8563_write(uint8_t cmd, uint16_t data)
 {
     uint8_t transferdata[3];
-    // uint8_t receivedata[3];
     transferdata[0] = cmd; // Command byte
     transferdata[1] = (data >> 8) & 0xFF; // High byte of data
     transferdata[2] = data & 0xFF; // Low byte of data
+
     spi0_dac_transfer(transferdata, 3);
 }
 
@@ -59,8 +59,10 @@ void dac8563_init(void)
     // Set LDAC inactive
     dac8563_write(CMD_LDAC_INACTIVE, 0x0003);
     // Update DAC-A and DAC-B
-    dac8563_setvoltage(0, 0.0); // Set initial voltage for DAC-A
-    dac8563_setvoltage(1, 0.0); // Set initial voltage for DAC-B
+    dac8563_setvoltage(0, 3.0); // Set initial voltage for DAC-A
+    dac8563_setvoltage(1, 4.0); // Set initial voltage for DAC-B
     // Reset gain to 2x
     dac8563_write(CMD_RESET_GAIN, 0x0001);
+    dac8563_setvoltage(0, 3.0); // Set initial voltage for DAC-A
+    dac8563_setvoltage(1, 4.0); // Set initial voltage for DAC-B
 }
