@@ -33,7 +33,7 @@ void dac8563_setvoltage(uint8_t channel, double voltage)
     {
         voltage = 10.0; // Ensure voltage does not exceed 10V
     }
-    write_val = voltage * 0x7FFF / 2 / 5;
+    write_val = voltage * 0x7FFF / 10;
 
     if (channel == 0)
     {
@@ -59,10 +59,8 @@ void dac8563_init(void)
     // Set LDAC inactive
     dac8563_write(CMD_LDAC_INACTIVE, 0x0003);
     // Update DAC-A and DAC-B
-    dac8563_setvoltage(0, 3.0); // Set initial voltage for DAC-A
-    dac8563_setvoltage(1, 4.0); // Set initial voltage for DAC-B
+    dac8563_setvoltage(0, 0.0); // Set initial voltage for DAC-A
+    dac8563_setvoltage(1, 0.0); // Set initial voltage for DAC-B
     // Reset gain to 2x
     dac8563_write(CMD_RESET_GAIN, 0x0001);
-    dac8563_setvoltage(0, 3.0); // Set initial voltage for DAC-A
-    dac8563_setvoltage(1, 4.0); // Set initial voltage for DAC-B
 }

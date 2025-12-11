@@ -88,7 +88,7 @@ int send_message(unsigned char *message, int len)
 #if defined(OS_OPTION_SMP)
     intSave = PRT_SplIrqLock(&g_ttyLock);
 #endif
-    ret = rpmsg_send(&tty_ept, message, len);
+    ret = rpmsg_trysend(&tty_ept, message, len);
 #if defined(OS_OPTION_SMP)
     PRT_SplIrqUnlock(&g_ttyLock, intSave);
 #endif
