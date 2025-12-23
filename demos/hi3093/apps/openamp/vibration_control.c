@@ -48,7 +48,7 @@ extern int send_message(unsigned char* message, int len);
 
 static void timer_callback(TimerHandle tmrHandle, U32 arg1, U32 arg2, U32 arg3, U32 arg4) {
     PRT_SemPost(taskstart_sem);
-    tmp_count++;
+    // tmp_count++;
     return;
 }
 
@@ -118,12 +118,12 @@ void virabtion_control(void) {
     if (wait_time_for_control > 0) {
         wait_time_for_control--;
     }
-    static long count = 0;
-    if (count % 2000 == 0) {
-        // PRT_Printf("mu_control=%.6f\n", mu_control);
-        PRT_Printf("%d ", tmp_count - count);
-    }
-    count++;
+    // static long count = 0;
+    // if (count % 2000 == 0) {
+    //     // PRT_Printf("mu_control=%.6f\n", mu_control);
+    //     PRT_Printf("%d ", tmp_count - count);
+    // }
+    // count++;
 }
 
 void secondary_path_identify() {
@@ -134,7 +134,7 @@ void secondary_path_identify() {
 
     exc_signal = 4.0 * get_sin_value();
     dac8563_setvoltage(DAC_CONTROL_CHANNEL, exc_signal + OUTPUT_VOLTAGE_OFFSET);
-    update_input_deque_only(exc_signal / 4);
+    update_input_deque_only(exc_signal / 4.0);
 
     adc7606_read_ref_signal(ad7606_buffer);
     adc7606_read_err_signal(ad7606_buffer);

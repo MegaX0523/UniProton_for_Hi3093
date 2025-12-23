@@ -7,11 +7,13 @@
 #define TYPE_LMS 0
 #define TYPE_SEP 1
 #define TYPE_ERR 2
+#define TYPE_INP 3
 
 static void static_deque_init(StaticDeque* deque);
 static DequeNode* static_node_alloc(int type, double data);
 static void deque_push_front(int type, StaticDeque* deque, double data);
 static int lms_node_index = 0;
+static int inp_node_index = 0;
 static int sep_node_index = 0;
 static int err_node_index = 0;
 static double weight[LMS_M] = {0};        // 滤波器系数
@@ -20,9 +22,11 @@ double mu_control = MU_MAX;               // 步长参数
 static double mu_identify = MU_MAX / 20;  // 步长参数
 
 static DequeNode lms_node_pool[MAX_INPUT_SIZE];
+static DequeNode inp_node_pool[MAX_INPUT_SIZE];
 static DequeNode sep_node_pool[MAX_DEQUE_SIZE];
 static DequeNode err_node_pool[MAX_ERROR_SIZE];
 static StaticDeque lms_deque = {0};
+static StaticDeque inp_deque = {0};
 static StaticDeque sep_deque = {0};
 static StaticDeque err_deque = {0};
 
@@ -50,7 +54,14 @@ static DequeNode* static_node_alloc(int type, double data) {
             sep_node_index = 0;
         }
         node = &sep_node_pool[sep_node_index++];
+    } else if (type == TYPE_INP)
+    {
+        if (inp_node_index >= MAX_INPUT_SIZE) {
+            inp_node_index = 0;
+        }
+        node = &inp_node_pool[inp_node_index++];
     }
+    
 
     node->data = data;
     node->prev = NULL;
@@ -158,19 +169,27 @@ void weight_sep_update(double err_signal) {
 
 double output_get(double ref_signal) {
     double output = 0;
-    double ref_filtered_signal = 0;
     DequeNode* current = NULL;
 
 #ifdef FxLMS
-    current = lms_deque.front;
+    double ref_filtered_signal = 0;
+    deque_push_front(TYPE_INP, &inp_deque, ref_signal);
+    current = inp_deque.front;
     for (int i = 0; i < LMS_M && current; i++) {
-        ref_filtered_signal += weight_sep[i] * current->data;
+        ref_filtered_signal += 2 *weight_sep[i] * current->data;
         current = current->next;
     }
     deque_push_front(TYPE_LMS, &lms_deque, ref_filtered_signal);
 #else
     deque_push_front(TYPE_LMS, &lms_deque, ref_signal);
 #endif
+    // lms_deque 未满时不输出
+    static int count = 50;
+    if(count > 1) {
+        count--;
+        return 0;
+    }
+
     current = lms_deque.front;
     for (int i = 0; i < LMS_M && current; i++) {
         output += current->data * weight[i];
@@ -212,17 +231,22 @@ void filter_init(void) {
         err_node_pool[i].next = NULL;
         err_node_pool[i].data = 0;
     }
+    for (int i = 0; i < MAX_INPUT_SIZE; i++) {
+        inp_node_pool[i].prev = NULL;
+        inp_node_pool[i].next = NULL;
+        inp_node_pool[i].data = 0;
+    }
 
     static_deque_init(&lms_deque);
+    static_deque_init(&inp_deque);
     static_deque_init(&sep_deque);
     static_deque_init(&err_deque);
 
     for (int i = 0; i < LMS_M; i++) {
         weight[i] = 0;
     }
-    // for (int i = 0; i < LMS_M; i++) {
-    //     weight_sep[i] = 0;
-    // }
+
+    // 次级通道初始参数
     weight_sep[0] = 0.164302;   // 6.7/4.5 * 0.11035291
     weight_sep[1] = 0.142222;   // 6.7/4.5 * 0.09554795
     weight_sep[2] = 0.118937;   // 6.7/4.5 * 0.07990297
@@ -258,8 +282,15 @@ void filter_reinit(void) {
         err_node_pool[i].next = NULL;
         err_node_pool[i].data = 0;
     }
+    inp_node_index = 0; 
+    for (int i = 0; i < MAX_INPUT_SIZE; i++) {
+        inp_node_pool[i].prev = NULL;
+        inp_node_pool[i].next = NULL;
+        inp_node_pool[i].data = 0;
+    }
 
     static_deque_init(&lms_deque);
+    static_deque_init(&inp_deque);
     static_deque_init(&sep_deque);
     static_deque_init(&err_deque);
 
@@ -267,3 +298,4 @@ void filter_reinit(void) {
         weight[i] = 0;
     }
 }
+

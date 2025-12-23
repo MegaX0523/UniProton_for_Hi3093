@@ -10,9 +10,8 @@
 #define LMS_M 16
 #define MU_MAX 0.2
 #define MAX_INPUT_SIZE (LMS_M * 2)  // 双倍长度保证滤波器需求
-#define MAX_ERROR_SIZE (LMS_M * 2)        // 错误队列容量
+#define MAX_ERROR_SIZE (LMS_M * 2)  // 错误队列容量
 #define MAX_DEQUE_SIZE (LMS_M * 2)  // 双倍长度保证滤波器需求
-// #define MAX_ERR_SIZE   8           // 错误队列容量
 
 /* 静态内存池实现的双端队列 */
 typedef struct DequeNode {
