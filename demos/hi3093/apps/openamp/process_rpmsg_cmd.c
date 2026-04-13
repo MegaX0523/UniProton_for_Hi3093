@@ -6,8 +6,8 @@
 
 #define OUTPUT_VOLTAGE_OFFSET 5.0
 
-bool state_virabtion_control_flag = false;  // ¿ÕÏÐ×´Ì¬
-bool state_excitation_flag = false;         // ¼¤Àø×´Ì¬
+bool state_virabtion_control_flag = false;  // ????ï¿½ï¿½???
+bool state_excitation_flag = false;         // ?ï¿½ï¿½??ï¿½ï¿½???
 bool state_control_flag = false;
 bool state_secondary_path_identify_flag = false;
 
@@ -29,7 +29,7 @@ int rec_msg_proc(void* data, int len) {
         case MSG_COMMAND:
             if (len = sizeof(uint16_t) + sizeof(uint16_t)) {
                 switch (packet->payload.command) {
-                    case START_EXCITATION:  // ¿ªÊ¼¼¤Àø
+                    case START_EXCITATION:  // ?????ï¿½ï¿½??
                         PRT_Printf("Received command: START_EXCITATION\n");
                         state_secondary_path_identify_flag = false;
                         dac8563_setvoltage(DAC_EXCITATION_CHANNEL, OUTPUT_VOLTAGE_OFFSET);
@@ -37,23 +37,24 @@ int rec_msg_proc(void* data, int len) {
                         state_virabtion_control_flag = true;
                         state_excitation_flag = true;
                         break;
-                    case STOP_EXCITATION:  // Í£Ö¹¼¤Àø
+                    case STOP_EXCITATION:  // ?????ï¿½ï¿½??
                         PRT_Printf("Received command: STOP_EXCITATION\n");
                         state_virabtion_control_flag = false;
                         state_excitation_flag = false;
                         state_control_flag = false;
                         wait_time_for_excit = 5000;
+                        wait_time_for_control = 10000;
                         dac8563_setvoltage(DAC_EXCITATION_CHANNEL, 0);
                         dac8563_setvoltage(DAC_CONTROL_CHANNEL, 0);
                         break;
-                    case START_CONTROL:  // ¿ªÊ¼¿ØÖÆ
+                    case START_CONTROL:  // ????????
                         PRT_Printf("Received command: START_CONTROL\n");
                         filter_reinit();
                         if (state_excitation_flag == true) {
                             state_control_flag = true;
                         }
                         break;
-                    case STOP_CONTROL:  //  Í£Ö¹¿ØÖÆ
+                    case STOP_CONTROL:  //  ????????
                         PRT_Printf("Received command: STOP_CONTROL\n");
                         state_control_flag = 0;
                         wait_time_for_control = 10000;
@@ -93,7 +94,7 @@ int rec_msg_proc(void* data, int len) {
                     case START_DAMPING:
                         PRT_Printf("Sending test array.\n", packet->payload.command);
                         for (uint16_t i = 0; i < REF_SIGNAL_ARRAY_SIZE; i++) {
-                            double value = get_sin_value();  // Ê¾ÀýÊý¾Ý
+                            double value = get_sin_value_mix();  // ????????
                             update_sensor_array(value * 0x7FFF / 10, 0x2345);
                             PRT_Printf("%.4lf ", value);
                             if ((i + 1) % 16 == 0) {

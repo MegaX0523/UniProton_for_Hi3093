@@ -7,8 +7,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define LMS_M 16
-#define MU_MAX 0.2
+#define LMS_M 32
+#define SEC_M 5
+#define MU_MAX 0.01
 #define MAX_INPUT_SIZE (LMS_M * 2)  // 双倍长度保证滤波器需求
 #define MAX_ERROR_SIZE (LMS_M * 2)  // 错误队列容量
 #define MAX_DEQUE_SIZE (LMS_M * 2)  // 双倍长度保证滤波器需求

@@ -10,7 +10,7 @@ typedef enum {
     STOP_CONTROL    = 0xC4, // 停止控制
     START_SP_IDENTIFY = 0xC5, // 开始次级通道辨识
     STOP_SP_IDENTIFY  = 0xC6, // 停止次级通道辨识
-    START_DAMPING    = 0xC7
+    SEND_CONTROL_PARAM = 0xC7, // 发送控制参数
 } cmd_type;
 
 // 消息类型定义 (双向独立)
@@ -23,7 +23,7 @@ typedef enum {
 
 typedef enum 
 {
-    PARAM_STEP_SIZE = 0x01,    // 步长
+    PARAM_STEP_SIZE = 0x01, // 最大步长
     PARAM_FREQUENCY = 0x02, // 频率
 }param_type;
 
@@ -37,6 +37,7 @@ typedef struct {
 // 传感器数组负载结构
 #define REF_SIGNAL_ARRAY_SIZE 200
 #define ERR_SIGNAL_ARRAY_SIZE 200
+#define INPUT_SIGNAL_ARRAY_SIZE 200
 typedef uint16_t SensorArray[REF_SIGNAL_ARRAY_SIZE];
 #pragma pack(pop)
 

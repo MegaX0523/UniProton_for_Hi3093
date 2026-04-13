@@ -29,7 +29,7 @@ static const uint16_t timer_interval = 1;
 static uint16_t ref_array_index = 1;
 static uint16_t err_array_index = 0;
 
-int16_t wait_time_for_excit = 5000;  // 等5秒压电驱动器稳定
+int16_t wait_time_for_excit = 5000;     // 等5秒压电驱动器稳定
 int32_t wait_time_for_control = 10000;  // 等5秒激励稳定
 SensorArray ref_array = {0};
 SensorArray err_array = {0};
@@ -41,7 +41,7 @@ typedef struct sin_args {
     double excitation_freq;
 } sin_arg;
 
-// sin_arg sin_param = {0.0, 87.2};
+// sin_arg sin_param = {0.0, 75.2};
 sin_arg sin_param = {0.0, 14.22};
 
 extern int send_message(unsigned char* message, int len);
@@ -57,13 +57,42 @@ void change_sin_pram(double freq) {
     sin_param.excitation_freq = freq;
 }
 
-double get_sin_value(void) {
+/* double get_sin_value(void) {
 #define PI 3.141592653
     double value = sin(sin_param.phase);
     sin_param.phase += 2 * PI * sin_param.excitation_freq * (timer_interval / 1000.0);
     while (sin_param.phase >= 2 * PI) {
         sin_param.phase -= 2 * PI;
     }
+    return value;
+} */
+typedef struct sin_mix_args {
+    double phase1;         // 第一个频率的相位
+    double excitation_freq1; // 第一个频率
+    double phase2;         // 第二个频率的相位
+    double excitation_freq2; // 第二个频率
+} sin_mix_arg;
+
+// 初始化两个频率（示例：14.22Hz + 5.0Hz，可按需修改）
+sin_mix_arg sin_mix_param = {0.0, 14.22, 0.0, 75.0}; 
+
+double get_sin_value_mix(void) {
+#define PI 3.141592653
+    // 计算两个正弦波并叠加
+    double value = 4 * sin(sin_mix_param.phase1) + 0 *sin(sin_mix_param.phase2);
+    
+    // 更新第一个频率的相位
+    sin_mix_param.phase1 += 2 * PI * sin_mix_param.excitation_freq1 * (timer_interval / 1000.0);
+    while (sin_mix_param.phase1 >= 2 * PI) {
+        sin_mix_param.phase1 -= 2 * PI;
+    }
+    
+    // 更新第二个频率的相位
+    sin_mix_param.phase2 += 2 * PI * sin_mix_param.excitation_freq2 * (timer_interval / 1000.0);
+    while (sin_mix_param.phase2 >= 2 * PI) {
+        sin_mix_param.phase2 -= 2 * PI;
+    }
+    
     return value;
 }
 
@@ -87,17 +116,22 @@ void virabtion_control(void) {
     static double exc_signal = 0;
     static double output_signal = 0;
     static int16_t ref_signal_raw = 0, err_signal_raw = 0;
-    static uint8_t ad7606_buffer[2] = {0x0};
+    static uint8_t ad7606_ref_buffer[2] = {0x0};
+    static uint8_t ad7606_err_buffer[2] = {0x0};
     // 施加激励
     if (state_excitation_flag) {
-        exc_signal = 4.0 * get_sin_value();
-        dac8563_setvoltage(DAC_EXCITATION_CHANNEL, exc_signal + OUTPUT_VOLTAGE_OFFSET);
+        exc_signal = 1.0 * get_sin_value_mix();
+        // srand((unsigned int)time(NULL));
+        // double white_noise;
+        // white_noise = ((double)rand() / RAND_MAX - 0.5) * 2.0;
+        dac8563_setvoltage(DAC_EXCITATION_CHANNEL, exc_signal  + OUTPUT_VOLTAGE_OFFSET);
     }
 
-    // 获取参考信号
-    adc7606_read_ref_signal(ad7606_buffer);
-    ref_signal_raw = (int16_t)((ad7606_buffer[0] << 8) | ad7606_buffer[1]);
-    ref_signal = (double)ref_signal_raw / 0x7fff;   // 输入的参考信号改为±1范围内
+    // 获取参考信号和误差信号
+    adc7606_read_ref_signal(ad7606_ref_buffer);
+    adc7606_read_err_signal(ad7606_err_buffer);
+    ref_signal_raw = (int16_t)((ad7606_ref_buffer[0] << 8) | ad7606_ref_buffer[1]);
+    ref_signal = (double)ref_signal_raw / 0x7fff;  // 输入的参考信号改为±1范围内
 
     if (state_control_flag && wait_time_for_control <= 0) {
         // 输出控制信号
@@ -105,9 +139,8 @@ void virabtion_control(void) {
         output_signal = output_signal > 10.0 ? 10.0 : (output_signal < -10.0 ? -10.0 : output_signal);
         dac8563_setvoltage(DAC_CONTROL_CHANNEL, -1.0 * output_signal + OUTPUT_VOLTAGE_OFFSET);
     }
-    // 获取误差信号
-    adc7606_read_err_signal(ad7606_buffer);
-    err_signal_raw = (int16_t)((ad7606_buffer[0] << 8) | ad7606_buffer[1]);
+
+    err_signal_raw = (int16_t)((ad7606_err_buffer[0] << 8) | ad7606_err_buffer[1]);
     err_signal = (double)err_signal_raw / 0x7fff;
 
     if (state_control_flag && wait_time_for_control <= 0) {
@@ -132,9 +165,9 @@ void secondary_path_identify() {
     int16_t err_signal_raw;
     uint8_t ad7606_buffer[2] = {0x0};
 
-    exc_signal = 4.0 * get_sin_value();
-    dac8563_setvoltage(DAC_CONTROL_CHANNEL, exc_signal + OUTPUT_VOLTAGE_OFFSET);
-    update_input_deque_only(exc_signal / 4.0);
+    exc_signal = 1.0 * get_sin_value_mix();
+    dac8563_setvoltage(DAC_CONTROL_CHANNEL,           exc_signal + OUTPUT_VOLTAGE_OFFSET);
+    update_input_deque_only(exc_signal / 1.0);
 
     adc7606_read_ref_signal(ad7606_buffer);
     adc7606_read_err_signal(ad7606_buffer);
@@ -142,7 +175,7 @@ void secondary_path_identify() {
     err_signal = (double)err_signal_raw / 0x7fff;
     weight_sep_update(err_signal);
 
-    update_sensor_array((int16_t)(exc_signal * 0x7FFF / 10), err_signal_raw);
+    update_sensor_array((int16_t)((exc_signal + 3) * 0x7FFF / 10), err_signal_raw + 0x3000);
     static int count = 1000;
     if (count-- < 1) {
         PRT_Printf("%.6f, %.6f\n ", exc_signal, err_signal);
@@ -215,6 +248,19 @@ void control_task_entry() {
                 wait_time_for_excit--;
                 continue;
             } else {
+                static int control_time = 55000;
+                control_time--;
+                if (control_time < 1) {
+                    state_virabtion_control_flag = false;
+                    state_excitation_flag = false;
+                    state_control_flag = false;
+                    wait_time_for_excit = 5000;
+                    wait_time_for_control = 10000;
+                    control_time = 55000;
+                    PRT_Printf("vibration control finished\n");
+                    dac8563_setvoltage(DAC_EXCITATION_CHANNEL, 0);
+                    dac8563_setvoltage(DAC_CONTROL_CHANNEL, 0);
+                }
                 virabtion_control();
             }
         } else if (state_secondary_path_identify_flag) {
